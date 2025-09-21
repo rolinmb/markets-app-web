@@ -7,6 +7,7 @@
 <body>
   <h1>markets-app-web</h1>
 
+  <!-- Mode selection -->
   <label for="modeSelect">Select Mode:</label>
   <select id="modeSelect" onchange="toggleAssetInput()">
     <option value="Equities">Equities</option>
@@ -21,7 +22,7 @@
   <div id="assetDiv">
     <label for="assetInput">Asset:</label>
     <input type="text" id="assetInput" placeholder="Type asset symbol...">
-    
+
     <label for="commoditySelect" id="commodityLabel" style="display:none;">Select Commodity:</label>
     <select id="commoditySelect" style="display:none;">
       <option value="wti">WTI</option>
@@ -40,6 +41,9 @@
 
   <button onclick="runScript()">Run</button>
   <pre id="response"></pre>
+
+  <h2>Generated Images</h2>
+  <div id="imageList"></div>
 
   <script>
     function toggleAssetInput() {
@@ -85,7 +89,25 @@
         });
     }
 
-    toggleAssetInput(); // initialize display
+    function updateImages() {
+      fetch("/list-images")
+        .then(res => res.json())
+        .then(files => {
+          const container = document.getElementById("imageList");
+          container.innerHTML = "";
+          files.forEach(f => {
+            const img = document.createElement("img");
+            img.src = "/img/" + f + "?t=" + Date.now();
+            img.style.width = "300px";
+            img.style.margin = "10px";
+            container.appendChild(img);
+          });
+        });
+    }
+
+    setInterval(updateImages, 1000);
+    toggleAssetInput();
+    updateImages();
   </script>
 </body>
 </html>
