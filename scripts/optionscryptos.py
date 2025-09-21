@@ -1,4 +1,5 @@
 from consts import TRADINGDAYS, OPTIONSURL5, OPTIONSURL6
+from util import sanitize_cell
 import re
 import csv
 import sys
@@ -26,7 +27,7 @@ if __name__ == "__main__":
 
     try:
         driver.get(url)
-        wait = WebDriverWait(driver, 10)
+        wait = WebDriverWait(driver, 5)
         # Wait for expiration buttons
         wait.until(
             EC.presence_of_all_elements_located(
@@ -53,7 +54,7 @@ if __name__ == "__main__":
                 yte = 0.0
             # Click expiration button
             driver.execute_script("arguments[0].click();", btn)
-            time.sleep(2)
+            time.sleep(3)
             wait.until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "table.table-jOonPmbB tbody tr"))
             )
@@ -70,28 +71,16 @@ if __name__ == "__main__":
                 cols = row.find_all("td")
                 if not cols:
                     continue
-                strike_td = row.find("td", class_="ellipsisContainer-bYDQcOkp")
+                strike_td = row.find("span", class_="ellipsisContainer-bYDQcOkp")
                 if not strike_td:
                     continue
                 strike = strike_td.get_text(strip=True)
-                cell_texts = [c.get_text(strip=True) for c in cols]
-                # Find strike index
-                strike_index = None
-                for i, c in enumerate(cols):
-                    if c == strike_td:
-                        strike_index = i
-                        break
-                if strike_index is None:
-                    continue
-                # Split sides
-                call_cols = cell_texts[:strike_index]
-                put_cols = cell_texts[strike_index + 1:]
-                if len(call_cols) < 13 or len(put_cols) < 14:
-                    print("Skipping row, unexpected col count", strike, len(call_cols), len(put_cols))
-                    continue
+                cell_texts = [sanitize_cell(c.get_text(strip=True)) for c in cols]
+                call_cols = cell_texts[:13]
+                put_cols = cell_texts[14:]
                 call_row = {
                     "Strike": strike,
-                    "IV%": put_cols[0],
+                    "StrikeIV%": put_cols[0],
                     "BidIV%": call_cols[0],
                     "AskIV%": call_cols[1],
                     "IntrValue": call_cols[2],
@@ -108,7 +97,7 @@ if __name__ == "__main__":
                 }
                 put_row = {
                     "Strike": strike,
-                    "IV%": put_cols[0],
+                    "StrikeIV%": put_cols[0],
                     "Volume": put_cols[1],
                     "Bid": put_cols[2],
                     "Ask": put_cols[3],
@@ -140,15 +129,16 @@ if __name__ == "__main__":
         writer = csv.writer(f)
         # Write header
         header = [
-            "Ticker", "Expiration", "YTE", "Strike", "IV%"
+            "Ticker", "Expiration", "YTE", "Strike", "StrikeIV%",
             # Call columns
-            "callBidIV", "callAskIV", "callIntrValue", "callTimeValue", "callRho", "callVega", 
-            "callTheta", "callGamma", "callDelta", "callPrice", "callAsk", "callBid",
+            "callBidIV%", "callAskIV%", "callIntrValue", "callTimeValue", "callRho", "callVega", 
+            "callTheta", "callGamma", "callDelta", "callPrice", "callAsk", "callBid", "callVolume",
             # Put columns
-            "putIV", "putVolume", "putBid", "putAsk", "putPrice", "putDelta", "putGamma",
-            "putTheta", "putVega", "putRho", "putTimeValue", "putIntrValue", "putAskIV", "putBidIV"
+            "putIV%", "putVolume", "putBid", "putAsk", "putPrice", "putDelta", "putGamma",
+            "putTheta", "putVega", "putRho", "putTimeValue", "putIntrValue", "putAskIV%", "putBidIV%"
         ]
         writer.writerow(header)
+
         # Iterate expirations
         for expiry in option_chain:
             expiration = expiry["Expiration"]
@@ -161,16 +151,15 @@ if __name__ == "__main__":
                     expiration,
                     f"{yte:.2f}",
                     call_row["Strike"],
-                    call_row["IV%"],
+                    call_row["StrikeIV%"],
                     # Call values
-                    call_row["BidIV"], call_row["AskIV"], call_row["IntrValue"], call_row["TimeValue"], 
+                    call_row["BidIV%"], call_row["AskIV%"], call_row["IntrValue"], call_row["TimeValue"], 
                     call_row["Rho"], call_row["Vega"], call_row["Theta"], call_row["Gamma"], 
-                    call_row["Delta"], call_row["Price"], call_row["Ask"], call_row["Bid"],
+                    call_row["Delta"], call_row["Price"], call_row["Ask"], call_row["Bid"], call_row["Volume"],
                     # Put values
-                    put_row["IV"], put_row["Volume"], put_row["Bid"], put_row["Ask"], put_row["Price"],
+                    put_row["Volume"], put_row["Bid"], put_row["Ask"], put_row["Price"],
                     put_row["Delta"], put_row["Gamma"], put_row["Theta"], put_row["Vega"], put_row["Rho"],
-                    put_row["TimeValue"], put_row["IntrValue"], put_row["AskIV"], put_row["BidIV"]
+                    put_row["TimeValue"], put_row["IntrValue"], put_row["AskIV%"], put_row["BidIV%"]
                 ]
                 writer.writerow(row)
-
     print(f"scripts/optionscryptos.py :: Option chain saved to {csv_file}")

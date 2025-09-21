@@ -1,4 +1,5 @@
 from consts import FEDFUNDS
+import re
 import math
 from scipy.stats import norm
 from scipy.optimize import brentq
@@ -95,3 +96,11 @@ def implied_volatility_put(P_market, S, K, T, r=FEDFUNDS):
     except Exception:
         iv = 0.000001
     return iv
+
+def sanitize_cell(cell):
+    if not cell:
+        return "0.0"
+    cell = cell.replace('\u2212', '-')
+    if "▒" in cell or not re.search(r"[0-9]", cell):
+        return "0.0"
+    return cell
