@@ -1,4 +1,4 @@
-from keys import AVKEY
+from key import AVKEY
 
 TRADINGDAYS = 252
 FEDFUNDS = 0.0408
