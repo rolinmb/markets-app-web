@@ -114,13 +114,13 @@ if __name__ == "__main__":
                 }
                 calls_list.append(call_row)
                 puts_list.append(put_row)
-        # Append after all rows processed for this expiration
-        option_chain.append({
-            "Expiration": exp_text,
-            "YTE": yte,
-            "Calls": calls_list,
-            "Puts": puts_list
-        })
+            # Append after all rows processed for this expiration
+            option_chain.append({
+                "Expiration": exp_text,
+                "YTE": yte,
+                "Calls": calls_list,
+                "Puts": puts_list
+            })
     finally:
         driver.quit()
     # Save to CSV
