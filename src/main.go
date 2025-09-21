@@ -12,7 +12,7 @@ import (
 // Map modes to Python scripts
 var modeScripts = map[string]string{
 	"Equities":        "scripts/equities.py",
-	"Cryptocurrencies": "scripts/crypto.py",
+	"Cryptocurrencies": "scripts/cryptos.py",
 	"Foreign Exchange": "scripts/forex.py",
 	"Commodities":     "scripts/commodities.py",
 	"Bonds":           "scripts/bonds.py",
