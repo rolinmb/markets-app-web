@@ -1,0 +1,6 @@
+src/main
+src/main.exe
+src/main.o
+__pycache__
+src/__pycache__
+scripts/keys.py

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Static HTML Example</title>
+</head>
+<body>
+  <h1>Simple Static Page</h1>
+  <input type="text" id="textInput" placeholder="Type something...">
+  <button onclick="sendText()">Submit</button>
+  <p id="response"></p>
+
+  <script>
+    function sendText() {
+      const text = document.getElementById("textInput").value;
+      fetch("/echo?msg=" + encodeURIComponent(text))
+        .then(res => res.text())
+        .then(data => {
+          document.getElementById("response").innerText = "Server response: " + data;
+        });
+    }
+  </script>
+</body>
+</html>
