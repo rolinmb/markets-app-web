@@ -129,45 +129,69 @@ if __name__ == "__main__":
                 ])
 
     print(f"scripts/options.py :: Saved {ticker} Option Chain to {csv_filename}")
-    #TODO: Plot iv surface for the cpp windows app to show
+    # Create 3D scatter plot for Calls iv
     strikes = []
     ytes = []
     ivs = []
-
     for expiry in option_chain.expiries:
-        for c in expiry.calls:  # you could also add puts if desired
+        for c in expiry.calls:
             strikes.append(c.strike)
             ytes.append(c.yte)
             ivs.append(c.iv)
-
-    # Convert to numpy arrays
     strikes = np.array(strikes)
     ytes = np.array(ytes)
     ivs = np.array(ivs)
-
-    # Create 3D scatter plot
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111, projection="3d")
     sc = ax.scatter(strikes, ytes, ivs, c=ivs, cmap="viridis")
     ax.set_xlabel("Strike Price")
     ax.set_ylabel("Years to Expiration (YTE)")
-    ax.set_zlabel("Implied Volatility")
-    ax.set_title(f"IV Surface for {ticker}")
+    ax.set_zlabel("Call Implied Volatility")
+    ax.set_title(f"Call IV Surface for {ticker}")
     fig.colorbar(sc, ax=ax, label="IV")
 
     png_path = os.path.join("static/img", f"{ticker}civ.png")
     bmp_path = os.path.join("static/img", f"{ticker}civ.bmp")
-
     plt.savefig(png_path, dpi=150)
     plt.close()
-
-    print("scripts/options.py :: PNG iv surface chart saved to", png_path)
-
+    print("scripts/options.py :: PNG Call iv surface chart saved to", png_path)
     with Image.open(png_path) as png:
         png = png.resize((400,300), Image.LANCZOS)
         png.convert("RGB").save(bmp_path, "BMP")
+    try:
+        os.remove(png_path)
+        print(f"scripts/options.py :: Deleted temporary PNG: {png_path}")
+    except:
+        pass
+    # Create 3D scatter plot for Puts iv
+    strikes = []
+    ytes = []
+    ivs = []
+    for expiry in option_chain.expiries:
+        for p in expiry.puts:
+            strikes.append(p.strike)
+            ytes.append(p.yte)
+            ivs.append(p.iv)
+    strikes = np.array(strikes)
+    ytes = np.array(ytes)
+    ivs = np.array(ivs)
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection="3d")
+    sc = ax.scatter(strikes, ytes, ivs, c=ivs, cmap="viridis")
+    ax.set_xlabel("Strike Price")
+    ax.set_ylabel("Years to Expiration (YTE)")
+    ax.set_zlabel("Put Implied Volatility")
+    ax.set_title(f"Put IV Surface for {ticker}")
+    fig.colorbar(sc, ax=ax, label="IV")
 
-    # Clean up
+    png_path = os.path.join("static/img", f"{ticker}piv.png")
+    bmp_path = os.path.join("static/img", f"{ticker}piv.bmp")
+    plt.savefig(png_path, dpi=150)
+    plt.close()
+    print("scripts/options.py :: PNG Put iv surface chart saved to", png_path)
+    with Image.open(png_path) as png:
+        png = png.resize((400,300), Image.LANCZOS)
+        png.convert("RGB").save(bmp_path, "BMP")
     try:
         os.remove(png_path)
         print(f"scripts/options.py :: Deleted temporary PNG: {png_path}\n")

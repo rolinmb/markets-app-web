@@ -17,6 +17,7 @@ var modeScripts = map[string]string{
 	"Commodities":     "scripts/commodities.py",
 	"Bonds":           "scripts/bonds.py",
 	"Options":         "scripts/options.py",
+	"Crypto Options":  "scripts/optionscryptos.py",
 }
 
 var allowedCommodities = map[string]bool{
@@ -65,7 +66,7 @@ func main() {
 				http.Error(w, "Invalid commodity selected", http.StatusBadRequest)
 				return
 			}
-		case "Equities", "Options":
+		case "Equities", "Options", "Crypto Options":
 			if len(asset) == 0 || len(asset) > 4 {
 				http.Error(w, "Equities/Options asset must be 1-4 characters", http.StatusBadRequest)
 				return

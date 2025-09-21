@@ -93,5 +93,5 @@ def implied_volatility_put(P_market, S, K, T, r=FEDFUNDS):
     try:
         iv = brentq(f, 1e-6, 5)  # volatility between 0.0001% and 500%
     except Exception:
-        iv = None
+        iv = 0.000001
     return iv
