@@ -36,7 +36,7 @@ if __name__ == "__main__":
                 if cells:
                     rows.append(cells)
 
-        with open("data/bonds.csv", "w", newline="", encoding="utf-8") as f:
+        with open("static/data/bonds.csv", "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             if headers:
                 writer.writerow(headers)
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         
         print("scripts/bonds.py :: data/bonds.csv written successfully")
 
-        df = pd.read_csv("data/bonds.csv")
+        df = pd.read_csv("static/data/bonds.csv")
 
         # Clean Yield column: remove % and convert to float
         df["Yield"] = df["Yield"].str.replace("%", "", regex=False).astype(float)
@@ -61,11 +61,11 @@ if __name__ == "__main__":
         plt.grid(True, linestyle="--", alpha=0.6)
         plt.tight_layout()
         
-        png_path = os.path.join("img", "bonds.png")
+        png_path = os.path.join("static/img", "bonds.png")
         plt.savefig(png_path, dpi=150, bbox_inches="tight")
         plt.close()
 
-        bmp_path = os.path.join("img", "bonds.bmp")
+        bmp_path = os.path.join("static/img", "bonds.bmp")
         with Image.open(png_path) as png:
             png = png.resize((400,300), Image.LANCZOS)
             png.convert("RGB").save(bmp_path, "BMP")
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         if os.path.exists(png_path):
             os.remove(png_path)
         
-        print("scripts/bonds.py :: img/bonds.bmp written successfully\n")
+        print("scripts/bonds.py :: static/mg/bonds.bmp written successfully\n")
         
 
         

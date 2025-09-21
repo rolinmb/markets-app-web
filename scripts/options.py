@@ -108,7 +108,7 @@ if __name__ == "__main__":
         expiries.append(OptionExpiry(ticker, formatted_expiration_dates[i], exp_in_years[i], calls, puts))
     
     option_chain = OptionChain(ticker, expiries)
-    csv_filename = f"data/{ticker}chain.csv"
+    csv_filename = f"static/data/{ticker}chain.csv"
     with open(csv_filename, mode="w", newline="") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow([
@@ -155,8 +155,8 @@ if __name__ == "__main__":
     ax.set_title(f"IV Surface for {ticker}")
     fig.colorbar(sc, ax=ax, label="IV")
 
-    png_path = os.path.join("img", f"{ticker}civ.png")
-    bmp_path = os.path.join("img", f"{ticker}civ.bmp")
+    png_path = os.path.join("static/img", f"{ticker}civ.png")
+    bmp_path = os.path.join("static/img", f"{ticker}civ.bmp")
 
     plt.savefig(png_path, dpi=150)
     plt.close()

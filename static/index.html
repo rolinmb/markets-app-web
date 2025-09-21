@@ -2,23 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Static HTML Example</title>
+  <title>markets-app-web</title>
 </head>
 <body>
-  <h1>Simple Static Page</h1>
-  <input type="text" id="textInput" placeholder="Type something...">
-  <button onclick="sendText()">Submit</button>
-  <p id="response"></p>
+  <h1>markets-app-web</h1>
+
+  <label for="modeSelect">Select Mode:</label>
+  <select id="modeSelect" onchange="toggleAssetInput()">
+    <option value="Equities">Equities</option>
+    <option value="Cryptocurrencies">Cryptocurrencies</option>
+    <option value="Foreign Exchange">Foreign Exchange</option>
+    <option value="Commodities">Commodities</option>
+    <option value="Bonds">Bonds</option>
+    <option value="Options">Options</option>
+  </select>
+
+  <!-- Asset container -->
+  <div id="assetDiv">
+    <label for="assetInput">Asset:</label>
+    <input type="text" id="assetInput" placeholder="Type asset symbol...">
+    
+    <label for="commoditySelect" id="commodityLabel" style="display:none;">Select Commodity:</label>
+    <select id="commoditySelect" style="display:none;">
+      <option value="wti">WTI</option>
+      <option value="brent">Brent</option>
+      <option value="natural_gas">Natural Gas</option>
+      <option value="copper">Copper</option>
+      <option value="aluminum">Aluminum</option>
+      <option value="wheat">Wheat</option>
+      <option value="corn">Corn</option>
+      <option value="cotton">Cotton</option>
+      <option value="sugar">Sugar</option>
+      <option value="coffee">Coffee</option>
+      <option value="all_commodities">All Commodities</option>
+    </select>
+  </div>
+
+  <button onclick="runScript()">Run</button>
+  <pre id="response"></pre>
 
   <script>
-    function sendText() {
-      const text = document.getElementById("textInput").value;
-      fetch("/echo?msg=" + encodeURIComponent(text))
+    function toggleAssetInput() {
+      const mode = document.getElementById("modeSelect").value;
+      const assetInput = document.getElementById("assetInput");
+      const commoditySelect = document.getElementById("commoditySelect");
+      const commodityLabel = document.getElementById("commodityLabel");
+
+      if (mode === "Bonds") {
+        assetInput.style.display = "none";
+        commoditySelect.style.display = "none";
+        commodityLabel.style.display = "none";
+      } else if (mode === "Commodities") {
+        assetInput.style.display = "none";
+        commoditySelect.style.display = "inline";
+        commodityLabel.style.display = "inline";
+      } else {
+        assetInput.style.display = "inline";
+        commoditySelect.style.display = "none";
+        commodityLabel.style.display = "none";
+      }
+    }
+
+    function runScript() {
+      const mode = document.getElementById("modeSelect").value;
+      let asset = "";
+
+      if (mode === "Commodities") {
+        asset = document.getElementById("commoditySelect").value;
+      } else if (mode !== "Bonds") {
+        asset = document.getElementById("assetInput").value;
+      }
+
+      let url = "/run?mode=" + encodeURIComponent(mode);
+      if (asset) {
+        url += "&asset=" + encodeURIComponent(asset);
+      }
+
+      fetch(url)
         .then(res => res.text())
         .then(data => {
-          document.getElementById("response").innerText = "Server response: " + data;
+          document.getElementById("response").innerText = data;
         });
     }
+
+    toggleAssetInput(); // initialize display
   </script>
 </body>
 </html>

@@ -42,7 +42,7 @@ def main():
         print("scripts/commodities.py :: No data returned from API.")
         return
 
-    csv_path = os.path.join("data", f"{function.lower()}.csv")
+    csv_path = os.path.join("static/data", f"{function.lower()}.csv")
 
     dates, values = [], []
     try:
@@ -86,8 +86,8 @@ def main():
             plt.legend()
             plt.tight_layout()
 
-            png_path = os.path.join("img", f"{function.lower()}.png")
-            bmp_path = os.path.join("img", f"{function.lower()}.bmp")
+            png_path = os.path.join("static/img", f"{function.lower()}.png")
+            bmp_path = os.path.join("static/img", f"{function.lower()}.bmp")
 
             plt.savefig(png_path, dpi=150)
             plt.close()

@@ -70,7 +70,7 @@ if __name__ == "__main__":
             ["Price", price], ["% Change (24hrs)", percentchange], ["$ Change (24hrs)", dollarchange], ["Symbol", crypto_symbol]
         ]
 
-        csv_path = os.path.join("data", f"{crypto}.csv")
+        csv_path = os.path.join("static/data", f"{crypto}.csv")
 
         with open(csv_path, mode="w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
@@ -104,11 +104,11 @@ if __name__ == "__main__":
         plt.legend()
         plt.grid(True)
 
-        png_path = os.path.join("img", f"{crypto}.png")
+        png_path = os.path.join("static/img", f"{crypto}.png")
         plt.savefig(png_path, dpi=150, bbox_inches="tight")
         plt.close()
 
-        bmp_path = os.path.join("img", f"{crypto}.bmp")
+        bmp_path = os.path.join("static/img", f"{crypto}.bmp")
         with Image.open(png_path) as png:
             png = png.resize((400, 300), Image.LANCZOS)
             png.convert("RGB").save(bmp_path, "BMP")

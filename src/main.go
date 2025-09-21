@@ -4,19 +4,100 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/exec"
+	"strings"
 )
 
+// Map modes to their corresponding Python scripts
+var modeScripts = map[string]string{
+	"Equities":        "scripts/equities.py",
+	"Cryptocurrencies": "scripts/cryptos.py",
+	"Foreign Exchange": "scripts/forex.py",
+	"Commodities":     "scripts/commodities.py",
+	"Bonds":           "scripts/bonds.py",
+	"Options":         "scripts/options.py",
+}
+
+// Allowed commodities
+var allowedCommodities = map[string]bool{
+	"wti":            true,
+	"brent":          true,
+	"natural_gas":    true,
+	"copper":         true,
+	"aluminum":       true,
+	"wheat":          true,
+	"corn":           true,
+	"cotton":         true,
+	"sugar":          true,
+	"coffee":         true,
+	"all_commodities": true,
+}
+
 func main() {
+	// Ensure directories exist
+	dirs := []string{"static/data", "static/img"}
+	for _, dir := range dirs {
+		err := os.MkdirAll(dir, 0755)
+		if err != nil {
+			log.Fatalf("Failed to create directory %s: %v", dir, err)
+		}
+	}
+
+	// Serve static files
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
 
-	// Echo endpoint
-	http.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
-		msg := r.URL.Query().Get("msg")
-		if msg == "" {
-			msg = "No message provided"
+	// Run Python script endpoint
+	http.HandleFunc("/run", func(w http.ResponseWriter, r *http.Request) {
+		mode := r.URL.Query().Get("mode")
+		script, ok := modeScripts[mode]
+		if !ok {
+			http.Error(w, "Invalid mode", http.StatusBadRequest)
+			return
 		}
-		fmt.Fprint(w, msg)
+
+		asset := strings.TrimSpace(r.URL.Query().Get("asset"))
+
+		// Validate asset per mode
+		switch mode {
+		case "Commodities":
+			if !allowedCommodities[asset] {
+				http.Error(w, "Invalid commodity selected", http.StatusBadRequest)
+				return
+			}
+		case "Equities", "Options":
+			if len(asset) == 0 || len(asset) > 4 {
+				http.Error(w, "Equities/Options asset must be 1-4 characters", http.StatusBadRequest)
+				return
+			}
+		case "Foreign Exchange":
+			if len(asset) != 6 {
+				http.Error(w, "Foreign Exchange asset must be exactly 6 characters", http.StatusBadRequest)
+				return
+			}
+		case "Cryptocurrencies":
+			if len(asset) == 0 || len(asset) > 15 {
+				http.Error(w, "Cryptocurrency asset must be 1-15 characters", http.StatusBadRequest)
+				return
+			}
+		case "Bonds":
+			asset = "" // ignore asset
+		}
+
+		// Run Python script
+		args := []string{script}
+		if asset != "" {
+			args = append(args, asset)
+		}
+		cmd := exec.Command("python", args...) // or "python3"
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Error running script: %v\nOutput: %s", err, out), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprint(w, string(out))
 	})
 
 	port := ":8080"

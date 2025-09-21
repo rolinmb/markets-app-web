@@ -49,7 +49,7 @@ if __name__ == "__main__":
         dollar_change = dollar_change_clean.group(0) if dollar_change_clean else dollar_change
         pairs.append(["$ Change", dollar_change])
 
-        csv_path = os.path.join("data", f"{ticker}.csv")
+        csv_path = os.path.join("static/data", f"{ticker}.csv")
 
         with open(csv_path, mode="w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
@@ -84,11 +84,11 @@ if __name__ == "__main__":
         plt.legend()
         plt.grid(True)
 
-        png_path = os.path.join("img", f"{ticker}.png")
+        png_path = os.path.join("static/img", f"{ticker}.png")
         plt.savefig(png_path, dpi=150, bbox_inches="tight")
         plt.close()
 
-        bmp_path = os.path.join("img", f"{ticker}.bmp")
+        bmp_path = os.path.join("static/img", f"{ticker}.bmp")
         with Image.open(png_path) as png:
             png = png.resize((400, 300), Image.LANCZOS)
             png.convert("RGB").save(bmp_path, "BMP")

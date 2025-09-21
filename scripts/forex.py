@@ -42,7 +42,7 @@ if __name__ == "__main__":
             ["Change", percentchange], ["$ Change", dollarchange]
         ]
 
-        csv_path = os.path.join("data", f"{fromcurrency}{tocurrency}.csv")
+        csv_path = os.path.join("static/data", f"{fromcurrency}{tocurrency}.csv")
 
         with open(csv_path, mode="w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
@@ -76,11 +76,11 @@ if __name__ == "__main__":
         plt.legend()
         plt.grid(True)
 
-        png_path = os.path.join("img", f"{fromcurrency}{tocurrency}.png")
+        png_path = os.path.join("static/img", f"{fromcurrency}{tocurrency}.png")
         plt.savefig(png_path, dpi=150, bbox_inches="tight")
         plt.close()
 
-        bmp_path = os.path.join("img", f"{fromcurrency}{tocurrency}.bmp")
+        bmp_path = os.path.join("static/img", f"{fromcurrency}{tocurrency}.bmp")
         with Image.open(png_path) as png:
             png = png.resize((400, 300), Image.LANCZOS)
             png.convert("RGB").save(bmp_path, "BMP")
