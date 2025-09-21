@@ -115,7 +115,6 @@ if __name__ == "__main__":
             "expiry", "underlying", "underlying_price", "strike", "call_or_put",
             "last", "bid", "ask", "volume", "open_interest", "yte"
         ])
-
         for expiry in option_chain.expiries:
             for c in expiry.calls:
                 writer.writerow([

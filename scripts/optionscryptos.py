@@ -1,10 +1,15 @@
 from consts import TRADINGDAYS, OPTIONSURL5, OPTIONSURL6
 from util import sanitize_cell
+import os
 import re
 import csv
 import sys
 import time
+import numpy as np
+from PIL import Image
 from bs4 import BeautifulSoup
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -138,7 +143,6 @@ if __name__ == "__main__":
             "putTheta", "putVega", "putRho", "putTimeValue", "putIntrValue", "putAskIV%", "putBidIV%"
         ]
         writer.writerow(header)
-
         # Iterate expirations
         for expiry in option_chain:
             expiration = expiry["Expiration"]
@@ -162,4 +166,98 @@ if __name__ == "__main__":
                     put_row["TimeValue"], put_row["IntrValue"], put_row["AskIV%"], put_row["BidIV%"]
                 ]
                 writer.writerow(row)
-    print(f"scripts/optionscryptos.py :: Option chain saved to {csv_file}")
+    print(f"scripts/optionscryptos.py :: {ticker} Option chain saved to {csv_file}")
+    # Create 3D mesh plot for Calls iv
+    strikes = []
+    ytes = []
+    ivs = []
+    for expiry in option_chain:
+        yte = expiry["YTE"]
+        for call in expiry["Calls"]:
+            try:
+                strike = float(call["Strike"])
+                iv = float(call["BidIV%"].replace("▒", "0.0"))  # sanitize weird chars
+            except ValueError:
+                continue
+            strikes.append(strike)
+            ytes.append(yte)
+            ivs.append(iv)
+    strikes = np.array(strikes)
+    ytes = np.array(ytes)
+    ivs = np.array(ivs)
+    strike_unique = np.unique(strikes)
+    yte_unique = np.unique(ytes)
+    X, Y = np.meshgrid(strike_unique, yte_unique)
+    Z = np.zeros_like(X)
+    for i, y in enumerate(yte_unique):
+        for j, s in enumerate(strike_unique):
+            mask = (strikes == s) & (ytes == y)
+            Z[i, j] = ivs[mask][0] if np.any(mask) else 0.0
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(X, Y, Z, cmap='viridis')
+    ax.set_xlabel("Strike")
+    ax.set_ylabel("Time to Expiration (YTE)")
+    ax.set_zlabel("Call IV%")
+    ax.set_title("Call Implied Volatility Surface")
+
+    png_path = os.path.join("static/img", f"{ticker}civ.png")
+    bmp_path = os.path.join("static/img", f"{ticker}civ.bmp")
+    plt.savefig(png_path, dpi=150)
+    plt.close()
+    print("scripts/optionscryptos.py :: PNG Call iv surface chart saved to", png_path)
+    with Image.open(png_path) as png:
+        png = png.resize((400,300), Image.LANCZOS)
+        png.convert("RGB").save(bmp_path, "BMP")
+    try:
+        os.remove(png_path)
+        print(f"scripts/optionscryptos.py :: Deleted temporary PNG: {png_path}")
+    except:
+        pass
+    
+    strikes = []
+    ytes = []
+    ivs = []
+    for expiry in option_chain:
+        yte = expiry["YTE"]
+        for call in expiry["Calls"]:
+            try:
+                strike = float(call["Strike"])
+                iv = float(call["BidIV%"].replace("▒", "0.0"))  # sanitize weird chars
+            except ValueError:
+                continue
+            strikes.append(strike)
+            ytes.append(yte)
+            ivs.append(iv)
+    strikes = np.array(strikes)
+    ytes = np.array(ytes)
+    ivs = np.array(ivs)
+    strike_unique = np.unique(strikes)
+    yte_unique = np.unique(ytes)
+    X, Y = np.meshgrid(strike_unique, yte_unique)
+    Z = np.zeros_like(X)
+    for i, y in enumerate(yte_unique):
+        for j, s in enumerate(strike_unique):
+            mask = (strikes == s) & (ytes == y)
+            Z[i, j] = ivs[mask][0] if np.any(mask) else 0.0
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(X, Y, Z, cmap='viridis')
+    ax.set_xlabel("Strike")
+    ax.set_ylabel("Time to Expiration (YTE)")
+    ax.set_zlabel("Put IV%")
+    ax.set_title("Put Implied Volatility Surface")
+
+    png_path = os.path.join("static/img", f"{ticker}piv.png")
+    bmp_path = os.path.join("static/img", f"{ticker}piv.bmp")
+    plt.savefig(png_path, dpi=150)
+    plt.close()
+    print("scripts/optionscryptos.py :: PNG Put iv surface chart saved to", png_path)
+    with Image.open(png_path) as png:
+        png = png.resize((400,300), Image.LANCZOS)
+        png.convert("RGB").save(bmp_path, "BMP")
+    try:
+        os.remove(png_path)
+        print(f"scripts/optionscryptos.py :: Deleted temporary PNG: {png_path}")
+    except:
+        pass
